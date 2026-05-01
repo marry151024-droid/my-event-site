@@ -1,208 +1,94 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  getDocs,
-  orderBy,
-  query,
-} from "firebase/firestore";
+import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 type Notice = {
-  id: string;
+  id?: string;
   title: string;
   type: string;
   date: string;
   content: string;
 };
 
-export default function NoticeManagerPage() {
-  const [password, setPassword] = useState("");
-  const [isLogin, setIsLogin] = useState(false);
+export default function NoticePage() {
   const [notices, setNotices] = useState<Notice[]>([]);
+  const [selected, setSelected] = useState<Notice | null>(null);
 
-  const [title, setTitle] = useState("");
-  const [type, setType] = useState("NEW");
-  const [date, setDate] = useState("2026.05.16");
-  const [content, setContent] = useState("");
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const q = query(
+          collection(db, "notices"),
+          orderBy("createdAt", "desc")
+        );
+        const snap = await getDocs(q);
 
-  const login = () => {
-    if (password === process.env.NEXT_PUBLIC_MANAGER_PASSWORD) {
-      setIsLogin(true);
-      loadNotices();
-    } else {
-      alert("비밀번호가 틀렸습니다.");
-    }
-  };
+        let list = snap.docs.map((d) => ({
+          id: d.id,
+          ...(d.data() as Notice),
+        }));
 
-  const loadNotices = async () => {
-    const q = query(collection(db, "notices"), orderBy("createdAt", "desc"));
-    const snap = await getDocs(q);
+        // 🔥 DB 비어있으면 기본 공지 사용
+        if (list.length === 0) {
+          list = defaultNotices;
+        }
 
-    const list = snap.docs.map((d) => ({
-      id: d.id,
-      ...(d.data() as Omit<Notice, "id">),
-    }));
+        setNotices(list);
+        setSelected(list[0]);
+      } catch (e) {
+        // 🔥 에러나면 기본 공지 fallback
+        setNotices(defaultNotices);
+        setSelected(defaultNotices[0]);
+      }
+    };
 
-    setNotices(list);
-  };
-
-  const saveNotice = async () => {
-    if (!title.trim() || !content.trim()) {
-      alert("제목과 내용을 입력해주세요.");
-      return;
-    }
-
-    await addDoc(collection(db, "notices"), {
-      title: title.trim(),
-      type,
-      date,
-      content,
-      createdAt: new Date().toISOString(),
-    });
-
-    alert("공지 저장 완료");
-
-    setTitle("");
-    setType("NEW");
-    setContent("");
-
-    loadNotices();
-  };
-
-  const removeNotice = async (id: string) => {
-    if (!confirm("이 공지를 삭제할까요?")) return;
-
-    await deleteDoc(doc(db, "notices", id));
-    loadNotices();
-  };
-
-  if (!isLogin) {
-    return (
-      <main className="manager-page">
-        <div className="manager-login">
-          <h1>공지 관리자 로그인</h1>
-
-          <input
-            type="password"
-            placeholder="비밀번호 입력"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") login();
-            }}
-          />
-
-          <button type="button" onClick={login}>
-            로그인
-          </button>
-        </div>
-      </main>
-    );
-  }
+    load();
+  }, []);
 
   return (
-    <main className="manager-page">
-      <section className="manager-box">
-        <h1>공지사항 관리</h1>
+    <main className="notice-page">
+      <section className="notice-layout">
 
-        <div className="manager-week">
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="공지 제목"
-          />
-
-          <input
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            placeholder="2026.05.16"
-          />
-
-          <select value={type} onChange={(e) => setType(e.target.value)}>
-            <option value="NEW">NEW</option>
-            <option value="공지">공지</option>
-            <option value="중요">중요</option>
-          </select>
-        </div>
-
-        <textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="공지 내용을 입력하세요."
-          style={{
-            width: "100%",
-            minHeight: "220px",
-            marginTop: "14px",
-            padding: "14px",
-            borderRadius: "16px",
-            background: "rgba(0,0,0,0.5)",
-            color: "white",
-            border: "1px solid rgba(168,85,247,0.5)",
-            resize: "vertical",
-          }}
-        />
-
-        <button
-          type="button"
-          className="save-btn"
-          onClick={saveNotice}
-          style={{ marginTop: "14px" }}
-        >
-          공지 저장
-        </button>
-
-        <div style={{ marginTop: "28px" }}>
-          <h2>등록된 공지</h2>
-
-          {notices.length === 0 ? (
-            <p style={{ opacity: 0.7 }}>등록된 공지가 없습니다.</p>
-          ) : (
-            notices.map((n) => (
-              <div
-                key={n.id}
-                style={{
-                  marginTop: "12px",
-                  padding: "14px",
-                  borderRadius: "14px",
-                  border: "1px solid rgba(168,85,247,0.35)",
-                  background: "rgba(0,0,0,0.35)",
-                }}
-              >
-                <strong>
-                  [{n.type}] {n.title}
-                </strong>
-                <p style={{ opacity: 0.6 }}>{n.date}</p>
-
-                <button
-                  type="button"
-                  onClick={() => removeNotice(n.id)}
-                  style={{
-                    marginTop: "8px",
-                    padding: "8px 12px",
-                    borderRadius: "10px",
-                    border: "0",
-                    cursor: "pointer",
-                    background: "#ef4444",
-                    color: "white",
-                    fontWeight: 800,
-                  }}
-                >
-                  삭제
-                </button>
+        {/* 리스트 */}
+        <div className="notice-list">
+          {notices.map((n, i) => (
+            <div
+              key={i}
+              className="notice-item"
+              onClick={() => setSelected(n)}
+              style={{ cursor: "pointer" }}
+            >
+              <div className="notice-left">
+                <span className="notice-badge">{n.type}</span>
+                <span className="notice-title">{n.title}</span>
               </div>
-            ))
-          )}
+              <span className="notice-date">{n.date}</span>
+            </div>
+          ))}
         </div>
+
+        {/* 상세 */}
+        {selected && (
+          <div className="notice-detail">
+            <h3>{selected.title}</h3>
+            <p className="detail-date">{selected.date}</p>
+
+            <pre className="detail-content">
+              {selected.content}
+            </pre>
+          </div>
+        )}
+
       </section>
     </main>
   );
 }
-const defaultNotices = [
+
+/* ================= 기본 공지 ================= */
+
+const defaultNotices: Notice[] = [
   {
     title: "운명상단 필수 공지",
     type: "공지",
@@ -242,59 +128,21 @@ const defaultNotices = [
 파장 : 솔(각광목)
 불사 : 시원사이다(각지국)
 속성 : 지니쁨(각지국)
-침식 : 망지(각다문), 성희형님(각지국)
 
 2파티
 파장 : 제이형(각증장)
-불사 : 싫(각다문)
-속성 : 양밍(광목)
-침식 : B상(각지국), 즈토(증장)
 
 3파티
 파장 : 싸패(각지국)
-불사 : 절터는스님(각증장)
-속성 : 최승아(다문)
-침식 : 외환카드(지국), 선량배
 
 4파티
 파장 : 허숙희(각다문)
-불사 : 긁(각다문)
-속성 : 새지아(각증장)
-침식 : 빠아카(각지국), 세상.(증장)
 
 5파티
 파장 : 님자(각증장)
-불사 : 박새로이(각광목)
-속성 : 뮤젤i(광목)
-침식 : 놀명(광목), 잿더미(증장)
 
 #. 나타 글공략
-
 https://cafe.naver.com/fkatjs/371
-    `,
-  },
-  {
-    title: "상단창고 이용수칙",
-    type: "NEW",
-    date: "2026.05.15",
-    content: `
-주 1회 지급
-- 타락죽 1000개
-- 반계탕 100개
-
-창고 물품은 상단 운영 목적입니다.
-개인 사용 및 무단 수령 금지
-
-필요 시 운영진 문의
-    `,
-  },
-  {
-    title: "상단 연구 지원 참여 안내",
-    type: "NEW",
-    date: "2026.05.14",
-    content: `
-상단 연구는 모든 인원이 참여해야 합니다.
-가능한 인원은 적극 참여 부탁드립니다.
     `,
   },
   {
@@ -306,12 +154,8 @@ https://cafe.naver.com/fkatjs/371
 매일 20시 30분
 독도에서 진행됩니다
 
-✔ 참여 가능 인원 시간 엄수 필수
-✔ 토벌 전 소환 기여도 및 벌 토벌 기부 확인 필수
-
-가능한 인원은 적극 참여 부탁드립니다!
-
-항상 즐겁게, 매너있게 게임하는 운명상단
+✔ 시간 엄수
+✔ 기여도 및 기부 확인 필수
     `,
   },
 ];
