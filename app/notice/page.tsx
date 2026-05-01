@@ -1,3 +1,9 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+
 type Notice = {
   id?: string;
   title: string;
@@ -133,3 +139,81 @@ https://cafe.naver.com/fkatjs/371
     `,
   },
 ];
+
+export default function NoticePage() {
+  const [notices, setNotices] = useState<Notice[]>(defaultNotices);
+  const [selected, setSelected] = useState<Notice>(defaultNotices[0]);
+
+  useEffect(() => {
+    const loadNotices = async () => {
+      try {
+        const snap = await getDocs(collection(db, "notices"));
+
+        const dbNotices: Notice[] = snap.docs.map((d) => ({
+          id: d.id,
+          ...(d.data() as Notice),
+        }));
+
+        if (dbNotices.length > 0) {
+          setNotices(dbNotices);
+          setSelected(dbNotices[0]);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    loadNotices();
+  }, []);
+
+  return (
+    <main className="notice-page">
+      <header className="notice-top">
+        <a href="/" className="notice-brand">
+          <img src="/logo.png" alt="운명상단 로고" />
+          <div>
+            <h1>거상 운명상단</h1>
+            <p>命 運 商 團</p>
+          </div>
+        </a>
+
+        <nav className="notice-menu">
+          <a href="/">기여도 랭킹</a>
+          <a className="active" href="/notice">
+            공지사항
+          </a>
+          <a href="/event">이벤트</a>
+          <a href="/manager">관리자</a>
+          <a href="/ocr">OCR</a>
+        </nav>
+      </header>
+
+      <section className="notice-layout">
+        <div className="notice-list">
+          {notices.map((n, i) => (
+            <button
+              type="button"
+              key={n.id || i}
+              className={`notice-item ${
+                selected.title === n.title ? "selected" : ""
+              }`}
+              onClick={() => setSelected(n)}
+            >
+              <div className="notice-left">
+                <span className="notice-badge">{n.type}</span>
+                <span className="notice-title">{n.title}</span>
+              </div>
+              <span className="notice-date">{n.date}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="notice-detail">
+          <h3>{selected.title}</h3>
+          <p className="detail-date">{selected.date}</p>
+          <pre className="detail-content">{selected.content}</pre>
+        </div>
+      </section>
+    </main>
+  );
+}
