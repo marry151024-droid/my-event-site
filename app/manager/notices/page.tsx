@@ -1,69 +1,127 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
-export default function NoticePage() {
-  const [notices, setNotices] = useState<any[]>([]);
-  const [selected, setSelected] = useState<any>(null);
+type Notice = {
+  id?: string;
+  title: string;
+  type: string;
+  date: string;
+  content: string;
+};
+
+export default function NoticeManagerPage() {
+  const [notices, setNotices] = useState<Notice[]>([]);
+
+  const [title, setTitle] = useState("");
+  const [type, setType] = useState("NEW");
+  const [date, setDate] = useState("2026.05.16");
+  const [content, setContent] = useState("");
+
+  // 🔥 공지 불러오기
+  const loadNotices = async () => {
+    const snap = await getDocs(collection(db, "notices"));
+    const list: Notice[] = snap.docs.map((d) => ({
+      id: d.id,
+      ...(d.data() as Notice),
+    }));
+
+    // 최신순 정렬
+    list.sort((a, b) => (a.date < b.date ? 1 : -1));
+
+    setNotices(list);
+  };
 
   useEffect(() => {
-    const loadNotices = async () => {
-      const q = query(
-        collection(db, "notices"),
-        orderBy("createdAt", "desc")
-      );
-
-      const snap = await getDocs(q);
-
-      const list = snap.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      setNotices(list);
-      if (list.length > 0) setSelected(list[0]);
-    };
-
     loadNotices();
   }, []);
 
-  return (
-    <main className="notice-page">
-      <section className="notice-layout">
+  // 🔥 공지 추가
+  const addNotice = async () => {
+    if (!title || !content) {
+      alert("제목 / 내용 입력해라");
+      return;
+    }
 
-        {/* 왼쪽 리스트 */}
+    await addDoc(collection(db, "notices"), {
+      title,
+      type,
+      date,
+      content,
+    });
+
+    alert("저장 완료");
+
+    setTitle("");
+    setContent("");
+
+    loadNotices();
+  };
+
+  // 🔥 삭제
+  const removeNotice = async (id?: string) => {
+    if (!id) return;
+
+    if (!confirm("삭제할거냐?")) return;
+
+    await deleteDoc(doc(db, "notices", id));
+    loadNotices();
+  };
+
+  return (
+    <main className="notice-manager">
+      <div className="manager-box">
+        <h2>공지사항 관리</h2>
+
+        {/* 입력 */}
+        <input
+          placeholder="공지 제목"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+
+        <input
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+        />
+
+        <select value={type} onChange={(e) => setType(e.target.value)}>
+          <option value="NEW">NEW</option>
+          <option value="공지">공지</option>
+        </select>
+
+        <textarea
+          placeholder="공지 내용"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+        />
+
+        <button onClick={addNotice}>공지 저장</button>
+
+        {/* 목록 */}
         <div className="notice-list">
           {notices.map((n) => (
-            <div
-              key={n.id}
-              className="notice-item"
-              onClick={() => setSelected(n)}
-              style={{ cursor: "pointer" }}
-            >
-              <div className="notice-left">
-                <span className="notice-badge">{n.type}</span>
-                <span className="notice-title">{n.title}</span>
+            <div key={n.id} className="notice-item">
+              <div>
+                <strong>[{n.type}] {n.title}</strong>
+                <p>{n.date}</p>
               </div>
-              <span className="notice-date">{n.date}</span>
+
+              <button onClick={() => removeNotice(n.id)}>
+                삭제
+              </button>
             </div>
           ))}
         </div>
-
-        {/* 오른쪽 상세 */}
-        {selected && (
-          <div className="notice-detail">
-            <h3>{selected.title}</h3>
-            <p className="detail-date">{selected.date}</p>
-
-            <pre className="detail-content">
-              {selected.content}
-            </pre>
-          </div>
-        )}
-
-      </section>
+      </div>
     </main>
   );
 }
