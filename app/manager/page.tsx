@@ -144,6 +144,9 @@ export default function ManagerPage() {
     );
   }
 
+  <a href="/manager/notices" className="save-btn">
+  공지사항 관리
+</a>
   return (
     <main className="manager-page">
       {toast && <div className="toast">{toast}</div>}
