@@ -78,6 +78,10 @@ export default function HomePage() {
         <h2>
           운명상단 <span>기여도 랭킹</span>
         </h2>
+         <p className="hero-sub">
+    항상 즐겁게 매너있게 게임하는 운명상단
+  </p>
+
         <p>운명상단의 전설은, 당신의 기여도로 완성됩니다.</p>
       </section>
 

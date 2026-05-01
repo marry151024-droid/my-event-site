@@ -1873,4 +1873,24 @@ footer {
     font-size: 13px;
     line-height: 1.7;
   }
+}.hero-sub {
+  margin-top: 10px;
+  font-size: 15px;
+  color: #facc15; /* 금색 느낌 */
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.hero-desc {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #aaa;
+}@media (max-width: 768px) {
+  .hero-sub {
+    font-size: 13px;
+  }
+
+  .hero-desc {
+    font-size: 12px;
+  }
 }
