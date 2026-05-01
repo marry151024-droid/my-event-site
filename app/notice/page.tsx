@@ -133,24 +133,17 @@ https://cafe.naver.com/fkatjs/371
       <section className="notice-layout">
 
         {/* 왼쪽 리스트 */}
-        <div className="notice-list-box">
-          {notices.map((n, i) => (
-            <div
-              key={i}
-              className={`notice-row ${
-                selected.title === n.title ? "active" : ""
-              }`}
-              onClick={() => setSelected(n)}
-            >
-              <span>{n.type}</span>
-              <div>
-                <strong>{n.title}</strong>
-              </div>
-              <em>{n.date}</em>
-            </div>
-          ))}
-        </div>
-
+        <div className="notice-list">
+  {notices.map((n, i) => (
+    <div key={i} className="notice-item">
+      <div className="notice-left">
+        <span className="notice-badge">NEW</span>
+        <span className="notice-title">{n.title}</span>
+      </div>
+      <span className="notice-date">{n.date}</span>
+    </div>
+  ))}
+</div>
         {/* 오른쪽 상세 */}
         <div className="notice-detail">
           <h3>{selected.title}</h3>

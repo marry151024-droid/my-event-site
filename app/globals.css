@@ -1742,3 +1742,76 @@ footer {
     width: 86px;
   }
 }
+@media (max-width: 520px) {
+  .mobile-menu {
+    width: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding: 4px 4px 8px;
+    gap: 8px;
+    scrollbar-width: none;
+  }
+
+  .mobile-menu::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobile-menu a {
+    flex: 0 0 auto;
+    min-width: 72px;
+    text-align: center;
+    font-size: 13px;
+    padding: 10px 12px;
+  }
+
+  .mobile-socials {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .mobile-socials a {
+    width: 100%;
+    padding: 11px 10px;
+  }
+}
+.notice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notice-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: rgba(10, 10, 18, 0.85);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  color: white;
+}
+
+.notice-left {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.notice-badge {
+  background: #ef4444;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+}
+
+.notice-title {
+  font-size: 15px;
+}
+
+.notice-date {
+  font-size: 12px;
+  opacity: 0.6;
+}
