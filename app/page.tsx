@@ -145,15 +145,6 @@ export default function HomePage() {
   <b>상단 연구 지원 참여 안내</b>
 </a>
 
-          <div className="mobile-line">
-            <span>NEW</span>
-            <b>상단창고 이용수칙</b>
-          </div>
-
-          <div className="mobile-line">
-            <span>NEW</span>
-            <b>상단 연구 지원 참여 안내</b>
-          </div>
         </article>
 
         <article className="mobile-event">
