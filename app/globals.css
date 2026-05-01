@@ -1814,4 +1814,63 @@ footer {
 .notice-date {
   font-size: 12px;
   opacity: 0.6;
+}.mobile-line {
+  color: white;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.mobile-line:hover {
+  background: rgba(168, 85, 247, 0.12);
+  border-radius: 12px;
+}.notice-item {
+  width: 100%;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.notice-item.selected {
+  border: 1px solid rgba(250, 204, 21, 0.65);
+  background: rgba(124, 58, 237, 0.28);
+}
+
+.detail-content {
+  white-space: pre-wrap;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+@media (max-width: 768px) {
+  .notice-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .notice-list {
+    order: 1;
+  }
+
+  .notice-detail {
+    order: 2;
+    padding: 18px 14px;
+  }
+
+  .notice-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px;
+    padding: 14px;
+  }
+
+  .notice-title {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .detail-content {
+    font-size: 13px;
+    line-height: 1.7;
+  }
 }

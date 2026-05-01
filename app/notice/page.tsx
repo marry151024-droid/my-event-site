@@ -2,8 +2,15 @@
 
 import { useState } from "react";
 
+type Notice = {
+  title: string;
+  type: string;
+  date: string;
+  content: string;
+};
+
 export default function NoticePage() {
-  const notices = [
+  const notices: Notice[] = [
     {
       title: "운명상단 필수 공지",
       type: "공지",
@@ -15,11 +22,11 @@ export default function NoticePage() {
 - 운영진 판단에 따라 경고 또는 추방 가능
       `,
     },
-  {
-  title: "나타 파티 진행 안내",
-  type: "NEW",
-  date: "2026.05.16",
-  content: `
+    {
+      title: "나타 파티 진행 안내",
+      type: "NEW",
+      date: "2026.05.16",
+      content: `
 #. 나타 진행
 
 1일~15일
@@ -81,8 +88,8 @@ export default function NoticePage() {
 #. 나타 글공략
 
 https://cafe.naver.com/fkatjs/371
-  `,
-},
+      `,
+    },
     {
       title: "상단창고 이용수칙",
       type: "NEW",
@@ -109,51 +116,55 @@ https://cafe.naver.com/fkatjs/371
     },
   ];
 
-  const [selected, setSelected] = useState(notices[0]);
+  const [selected, setSelected] = useState<Notice>(notices[0]);
 
   return (
     <main className="notice-page">
-        <header className="notice-top">
-  <a href="/" className="notice-brand">
-    <img src="/logo.png" alt="운명상단 로고" />
-    <div>
-      <h1>거상 운명상단</h1>
-      <p>命 運 商 團</p>
-    </div>
-  </a>
+      <header className="notice-top">
+        <a href="/" className="notice-brand">
+          <img src="/logo.png" alt="운명상단 로고" />
+          <div>
+            <h1>거상 운명상단</h1>
+            <p>命 運 商 團</p>
+          </div>
+        </a>
 
-  <nav className="notice-menu">
-    <a href="/">기여도 랭킹</a>
-    <a className="active" href="/notice">공지사항</a>
-    <a href="/event">이벤트</a>
-    <a href="/manager">관리자</a>
-    <a href="/ocr">OCR</a>
-  </nav>
-</header>
+        <nav className="notice-menu">
+          <a href="/">기여도 랭킹</a>
+          <a className="active" href="/notice">
+            공지사항
+          </a>
+          <a href="/event">이벤트</a>
+          <a href="/manager">관리자</a>
+          <a href="/ocr">OCR</a>
+        </nav>
+      </header>
+
       <section className="notice-layout">
-
-        {/* 왼쪽 리스트 */}
         <div className="notice-list">
-  {notices.map((n, i) => (
-    <div key={i} className="notice-item">
-      <div className="notice-left">
-        <span className="notice-badge">NEW</span>
-        <span className="notice-title">{n.title}</span>
-      </div>
-      <span className="notice-date">{n.date}</span>
-    </div>
-  ))}
-</div>
-        {/* 오른쪽 상세 */}
+          {notices.map((n, i) => (
+            <button
+              type="button"
+              key={i}
+              className={`notice-item ${
+                selected.title === n.title ? "selected" : ""
+              }`}
+              onClick={() => setSelected(n)}
+            >
+              <div className="notice-left">
+                <span className="notice-badge">{n.type}</span>
+                <span className="notice-title">{n.title}</span>
+              </div>
+              <span className="notice-date">{n.date}</span>
+            </button>
+          ))}
+        </div>
+
         <div className="notice-detail">
           <h3>{selected.title}</h3>
           <p className="detail-date">{selected.date}</p>
-
-          <pre className="detail-content">
-            {selected.content}
-          </pre>
+          <pre className="detail-content">{selected.content}</pre>
         </div>
-
       </section>
     </main>
   );
